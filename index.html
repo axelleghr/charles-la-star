@@ -32,9 +32,10 @@
     min-height: 100vh;
     padding-bottom: 80px;
     background-color: #f2f2f7;
+    overflow-x: hidden;
   }
 
-  /* --- MESH GRADIENT --- */
+  /* --- MESH GRADIENT (Style Siri/Apple Music) --- */
   .mesh-bg {
     position: fixed;
     top: 0; left: 0;
@@ -64,7 +65,7 @@
     100% { transform: translate(0, 0) scale(1); }
   }
 
-  /* --- NAVIGATION TOP EN VERRE --- */
+  /* --- NAVIGATION --- */
   nav {
     position: sticky;
     top: 0;
@@ -88,23 +89,8 @@
     flex-wrap: wrap;
   }
 
-  /* --- RECHERCHE --- */
-  .search-wrapper {
-    position: relative;
-    flex: 1;
-    max-width: 400px;
-  }
-
-  .search-icon {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--apple-text-muted);
-    font-size: 14px;
-    pointer-events: none;
-  }
-
+  .search-wrapper { position: relative; flex: 1; max-width: 400px; }
+  .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--apple-text-muted); font-size: 14px; pointer-events: none; }
   .search-input {
     width: 100%;
     background: rgba(255, 255, 255, 0.5);
@@ -115,21 +101,10 @@
     padding: 10px 16px 10px 36px;
     outline: none;
     transition: background 0.2s, box-shadow 0.2s;
-    box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);
   }
+  .search-input:focus { background: rgba(255, 255, 255, 0.8); box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.3); }
 
-  .search-input::placeholder { color: var(--apple-text-muted); }
-  .search-input:focus { 
-    background: rgba(255, 255, 255, 0.8); 
-    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.3); 
-  }
-
-  /* --- CONTRÔLES DROITE --- */
-  .controls-right {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
+  .controls-right { display: flex; align-items: center; gap: 12px; }
 
   .random-btn, .stop-btn {
     padding: 8px 16px;
@@ -140,80 +115,25 @@
     transition: all 0.3s ease;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    border: 1px solid transparent;
+    display: flex; align-items: center; justify-content: center;
+    gap: 6px; border: 1px solid transparent;
   }
 
-  .random-btn {
-    background: rgba(0, 113, 227, 0.1);
-    color: var(--apple-blue);
-    border-color: rgba(0, 113, 227, 0.3);
-  }
+  .random-btn { background: rgba(0, 113, 227, 0.1); color: var(--apple-blue); border-color: rgba(0, 113, 227, 0.3); }
+  .random-btn:hover { background: var(--apple-blue); color: white; box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3); }
 
-  .random-btn:hover {
-    background: var(--apple-blue);
-    color: white;
-    box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
-  }
+  .stop-btn { background: rgba(255, 59, 48, 0.1); color: #ff3b30; border-color: rgba(255, 59, 48, 0.3); opacity: 0; pointer-events: none; }
+  .stop-btn.visible { opacity: 1; pointer-events: auto; }
+  .stop-btn:hover { background: #ff3b30; color: white; box-shadow: 0 4px 12px rgba(255, 59, 48, 0.3); }
 
-  .stop-btn {
-    background: rgba(255, 59, 48, 0.1);
-    color: #ff3b30;
-    border-color: rgba(255, 59, 48, 0.3);
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  .stop-btn.visible {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  .stop-btn:hover { 
-    background: #ff3b30; 
-    color: white;
-    box-shadow: 0 4px 12px rgba(255, 59, 48, 0.3);
-  }
-
-  /* --- HERO SECTION --- */
-  header.hero {
-    text-align: center;
-    padding: 80px 20px 60px;
-    max-width: 980px;
-    margin: 0 auto;
-  }
-
-  h1 {
-    font-size: clamp(40px, 8vw, 80px);
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    line-height: 1.05;
-    background: rgba(0, 0, 0, 0.85);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-
-  .subtitle {
-    font-size: clamp(18px, 4vw, 24px);
-    color: rgba(29, 29, 31, 0.7);
-    font-weight: 500;
-  }
+  /* --- HEADER --- */
+  header.hero { text-align: center; padding: 60px 20px 40px; max-width: 980px; margin: 0 auto; }
+  h1 { font-size: clamp(40px, 8vw, 80px); font-weight: 700; letter-spacing: -0.02em; line-height: 1.05; background: rgba(0, 0, 0, 0.85); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .subtitle { font-size: clamp(18px, 4vw, 24px); color: rgba(29, 29, 31, 0.7); font-weight: 500; }
 
   /* --- GRILLE --- */
-  main {
-    max-width: 1020px;
-    margin: 0 auto;
-    padding: 0 20px;
-  }
-
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 24px;
-  }
+  main { max-width: 1020px; margin: 0 auto; padding: 0 20px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 24px; }
 
   /* --- CARTES --- */
   .sound-card {
@@ -223,37 +143,33 @@
     border: 1px solid var(--glass-border);
     border-radius: var(--border-radius-card);
     padding: 24px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    text-align: left;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-    aspect-ratio: 1 / 1;
+    display: flex; flex-direction: column; align-items: flex-start; text-align: left;
+    cursor: pointer; position: relative; overflow: hidden; aspect-ratio: 1 / 1;
     box-shadow: var(--glass-shadow);
     transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.3s ease;
   }
-
   .sound-card:hover { transform: scale(1.02) translateY(-4px); background: rgba(255, 255, 255, 0.6); }
 
-  .card-eyebrow { font-size: 13px; font-weight: 600; text-transform: uppercase; color: var(--apple-text-muted); margin-bottom: 8px; }
-  .label { font-size: 22px; font-weight: 700; color: var(--apple-text); line-height: 1.15; }
-  .emoji { font-size: 80px; position: absolute; bottom: 15px; right: 15px; transition: transform 0.4s ease; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.15)); }
+  .card-eyebrow { font-size: 13px; font-weight: 600; text-transform: uppercase; color: var(--apple-text-muted); margin-bottom: 8px; z-index: 2; }
+  .label { font-size: 22px; font-weight: 700; color: var(--apple-text); line-height: 1.15; z-index: 2; }
+  .emoji { font-size: 80px; position: absolute; bottom: 15px; right: 15px; transition: transform 0.4s ease; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.15)); z-index: 1; }
   .sound-card:hover .emoji { transform: scale(1.1) rotate(-5deg); }
 
+  /* FAVORIS */
   .fav-btn {
     position: absolute; top: 15px; right: 15px; background: none; border: none; cursor: pointer; z-index: 10;
-    color: rgba(0, 0, 0, 0.2); transition: transform 0.2s ease, color 0.2s ease;
+    color: rgba(0, 0, 0, 0.15); transition: transform 0.2s ease, color 0.2s ease;
     display: flex; align-items: center; justify-content: center;
   }
-  .fav-btn:hover { transform: scale(1.15); color: rgba(0, 0, 0, 0.5); }
+  .fav-btn:hover { transform: scale(1.15); color: rgba(0, 0, 0, 0.4); }
   .fav-btn.is-favorite { color: #4a4a4a; transform: scale(1.05); }
+  .fav-btn.is-favorite:hover { color: #1d1d1f; }
 
-  .progress-wrap { position: absolute; bottom: 0; left: 0; right: 0; height: 5px; background: transparent; }
-  .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #ff2a5f, #bf5af2, #0071e3); }
+  .progress-wrap { position: absolute; bottom: 0; left: 0; right: 0; height: 5px; background: transparent; z-index: 3; }
+  .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #ff2a5f, #bf5af2, #0071e3); transition: width 0.1s linear; }
   .sound-card.is-playing { background: rgba(255, 255, 255, 0.85); }
 
+  /* MOBILE */
   @media (max-width: 600px) {
     .nav-container { flex-direction: column; gap: 12px; }
     .controls-right { width: 100%; justify-content: stretch; gap: 10px; }
@@ -261,6 +177,7 @@
     .grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
     .label { font-size: 15px; }
     .emoji { font-size: 55px; }
+    header.hero { padding: 40px 15px 30px; }
   }
 </style>
 </head>
@@ -317,8 +234,8 @@
       { name: "Nabilla", emoji: "💅", data: "audio/nabilla.wav" }
     ];
 
-    // Global variables from environment
-    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+    // Environment variables
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'charles-box-app';
     const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
     
     let db, auth, user;
@@ -333,7 +250,7 @@
 
     async function initFirebase() {
       if (!firebaseConfig.apiKey) {
-        console.warn("Firebase not configured. Favorites will be session-only.");
+        console.warn("Cloud save disabled. Check config.");
         renderSounds();
         return;
       }
@@ -349,37 +266,42 @@
           } else {
             await signInAnonymously(auth);
           }
-        } catch (e) { console.error("Auth failed:", e); }
+        } catch (e) { console.error("Auth error:", e); }
       };
 
       await initAuth();
 
       onAuthStateChanged(auth, (u) => {
         user = u;
-        if (user) loadFavorites();
-        else renderSounds();
+        if (user) {
+          loadFavorites();
+        } else {
+          renderSounds();
+        }
       });
     }
 
     async function loadFavorites() {
-      if (!user) return;
+      if (!user || !db) return;
+      // Collection path must follow /artifacts/{appId}/users/{userId}/{collectionName}
       const favDocRef = doc(db, 'artifacts', appId, 'users', user.uid, 'settings', 'favorites');
       
       onSnapshot(favDocRef, (docSnap) => {
         if (docSnap.exists()) {
-          favorites = new Set(docSnap.data().list || []);
+          const list = docSnap.data().list || [];
+          favorites = new Set(list);
+          renderSounds(searchInput.value);
         } else {
           favorites = new Set();
+          renderSounds(searchInput.value);
         }
-        renderSounds(searchInput.value);
       }, (err) => {
         console.error("Firestore error:", err);
-        renderSounds(searchInput.value);
       });
     }
 
     async function toggleFavorite(name) {
-      // Optimistic UI update
+      // Optimistic UI update for speed
       if (favorites.has(name)) favorites.delete(name);
       else favorites.add(name);
       
@@ -389,9 +311,9 @@
       
       try {
         const favDocRef = doc(db, 'artifacts', appId, 'users', user.uid, 'settings', 'favorites');
-        await setDoc(favDocRef, { list: Array.from(favorites) });
+        await setDoc(favDocRef, { list: Array.from(favorites) }, { merge: true });
       } catch (e) {
-        console.error("Save failed:", e);
+        console.error("Failed to save progress:", e);
       }
     }
 
@@ -417,7 +339,7 @@
       currentCard = cardElement;
       cardElement.classList.add('is-playing');
       stopBtn.classList.add('visible');
-      currentAudio.play().catch(e => console.error("Audio play failed:", e));
+      currentAudio.play().catch(e => console.error(e));
       animationFrameId = requestAnimationFrame(updateProgress);
       currentAudio.onended = stopCurrentSound;
     }
@@ -425,8 +347,16 @@
     function renderSounds(filter = '') {
       grid.innerHTML = '';
       const filterLower = filter.toLowerCase();
+      
+      // Sort: favorites first, then alphabetically
       const filtered = SOUNDS.filter(s => s.name.toLowerCase().includes(filterLower))
-        .sort((a, b) => (favorites.has(b.name) ? -1 : 1) - (favorites.has(a.name) ? -1 : 1));
+        .sort((a, b) => {
+          const aFav = favorites.has(a.name);
+          const bFav = favorites.has(b.name);
+          if (aFav && !bFav) return -1;
+          if (!aFav && bFav) return 1;
+          return a.name.localeCompare(b.name);
+        });
 
       filtered.forEach((sound) => {
         const card = document.createElement('div');
@@ -434,7 +364,7 @@
         const isFav = favorites.has(sound.name);
 
         card.innerHTML = `
-          <button class="fav-btn ${isFav ? 'is-favorite' : ''}">
+          <button class="fav-btn ${isFav ? 'is-favorite' : ''}" aria-label="Favoris">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
           </button>
           <span class="card-eyebrow">Audio</span>
@@ -461,7 +391,6 @@
     };
 
     initFirebase();
-    if (!firebaseConfig.apiKey) renderSounds(); // Fallback if firebase is disabled
   </script>
 </body>
 </html>
