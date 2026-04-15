@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Charles Box - Apple Music Style</title>
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js" type="module"></script>
+<script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js" type="module"></script>
+<script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js" type="module"></script>
+
 <style>
   :root {
     --apple-text: #1d1d1f;
@@ -21,7 +26,6 @@
 
   body {
     color: var(--apple-text);
-    /* La police native d'Apple (San Francisco) */
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -30,7 +34,7 @@
     background-color: #f2f2f7;
   }
 
-  /* --- MESH GRADIENT (Style Apple Music / Siri) --- */
+  /* --- MESH GRADIENT --- */
   .mesh-bg {
     position: fixed;
     top: 0; left: 0;
@@ -127,11 +131,7 @@
     gap: 12px;
   }
 
-  /* Bouton Aléatoire (Bleu) */
-  .random-btn {
-    background: rgba(0, 113, 227, 0.1);
-    color: var(--apple-blue);
-    border: 1px solid rgba(0, 113, 227, 0.3);
+  .random-btn, .stop-btn {
     padding: 8px 16px;
     border-radius: 20px;
     font-size: 15px;
@@ -144,35 +144,27 @@
     align-items: center;
     justify-content: center;
     gap: 6px;
+    border: 1px solid transparent;
+  }
+
+  .random-btn {
+    background: rgba(0, 113, 227, 0.1);
+    color: var(--apple-blue);
+    border-color: rgba(0, 113, 227, 0.3);
   }
 
   .random-btn:hover {
     background: var(--apple-blue);
     color: white;
-    border-color: var(--apple-blue);
     box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
   }
-  .random-btn:active { transform: scale(0.96); }
 
-  /* Bouton d'action principal en verre rouge */
   .stop-btn {
     background: rgba(255, 59, 48, 0.1);
     color: #ff3b30;
-    border: 1px solid rgba(255, 59, 48, 0.3);
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
+    border-color: rgba(255, 59, 48, 0.3);
     opacity: 0;
     pointer-events: none;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
   }
 
   .stop-btn.visible {
@@ -182,11 +174,9 @@
 
   .stop-btn:hover { 
     background: #ff3b30; 
-    color: white; 
-    border-color: #ff3b30;
+    color: white;
     box-shadow: 0 4px 12px rgba(255, 59, 48, 0.3);
   }
-  .stop-btn:active { transform: scale(0.96); }
 
   /* --- HERO SECTION --- */
   header.hero {
@@ -201,9 +191,6 @@
     font-weight: 700;
     letter-spacing: -0.02em;
     line-height: 1.05;
-    color: var(--apple-text);
-    margin-bottom: 12px;
-    /* Effet de texte translucide pour laisser passer les couleurs */
     background: rgba(0, 0, 0, 0.85);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -213,7 +200,6 @@
     font-size: clamp(18px, 4vw, 24px);
     color: rgba(29, 29, 31, 0.7);
     font-weight: 500;
-    letter-spacing: 0.01em;
   }
 
   /* --- GRILLE --- */
@@ -229,7 +215,7 @@
     gap: 24px;
   }
 
-  /* --- CARTES PRODUIT APPLE EN VERRE --- */
+  /* --- CARTES --- */
   .sound-card {
     background: var(--glass-bg);
     backdrop-filter: blur(40px) saturate(200%);
@@ -246,194 +232,39 @@
     overflow: hidden;
     aspect-ratio: 1 / 1;
     box-shadow: var(--glass-shadow);
-    transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.3s ease, box-shadow 0.3s ease;
-    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.3s ease;
   }
 
-  /* Reflet lumineux subtil sur la carte */
-  .sound-card::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 50%);
-    border-radius: inherit;
-    pointer-events: none;
-  }
+  .sound-card:hover { transform: scale(1.02) translateY(-4px); background: rgba(255, 255, 255, 0.6); }
 
-  .sound-card:hover {
-    transform: scale(1.02) translateY(-4px);
-    background: rgba(255, 255, 255, 0.6);
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
-  }
+  .card-eyebrow { font-size: 13px; font-weight: 600; text-transform: uppercase; color: var(--apple-text-muted); margin-bottom: 8px; }
+  .label { font-size: 22px; font-weight: 700; color: var(--apple-text); line-height: 1.15; }
+  .emoji { font-size: 80px; position: absolute; bottom: 15px; right: 15px; transition: transform 0.4s ease; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.15)); }
+  .sound-card:hover .emoji { transform: scale(1.1) rotate(-5deg); }
 
-  .sound-card:active {
-    transform: scale(0.98);
-  }
-
-  .card-eyebrow {
-    font-size: 13px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--apple-text-muted);
-    margin-bottom: 8px;
-    z-index: 2;
-  }
-
-  .label {
-    font-size: 22px;
-    font-weight: 700;
-    letter-spacing: -0.015em;
-    color: var(--apple-text);
-    line-height: 1.15;
-    z-index: 2;
-    max-width: 100%;
-  }
-
-  .emoji {
-    font-size: 80px;
-    position: absolute;
-    bottom: 15px;
-    right: 15px;
-    z-index: 1;
-    transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-    filter: drop-shadow(0 10px 15px rgba(0,0,0,0.15));
-  }
-
-  .sound-card:hover .emoji {
-    transform: scale(1.1) rotate(-5deg);
-  }
-
-  /* --- BOUTON FAVORIS --- */
   .fav-btn {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    z-index: 10;
-    color: rgba(0, 0, 0, 0.2);
-    transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), color 0.2s ease;
-    transform-origin: center;
-    padding: 5px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    position: absolute; top: 15px; right: 15px; background: none; border: none; cursor: pointer; z-index: 10;
+    color: rgba(0, 0, 0, 0.2); transition: transform 0.2s ease, color 0.2s ease;
   }
+  .fav-btn:hover { transform: scale(1.15); color: rgba(0, 0, 0, 0.5); }
+  .fav-btn.is-favorite { color: #4a4a4a; transform: scale(1.05); }
 
-  .fav-btn:hover {
-    transform: scale(1.15);
-    color: rgba(0, 0, 0, 0.5);
-  }
+  .progress-wrap { position: absolute; bottom: 0; left: 0; right: 0; height: 5px; background: transparent; }
+  .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #ff2a5f, #bf5af2, #0071e3); }
+  .sound-card.is-playing { background: rgba(255, 255, 255, 0.85); }
 
-  .fav-btn.is-favorite {
-    color: #4a4a4a;
-    transform: scale(1.05);
-  }
-  
-  .fav-btn.is-favorite:hover {
-    transform: scale(1.15);
-    color: #1d1d1f;
-  }
-
-  /* Barre de progression avec dégradé vibrant */
-  .progress-wrap {
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 5px;
-    background: transparent;
-    z-index: 3;
-  }
-
-  .progress-bar {
-    height: 100%;
-    width: 0%;
-    background: linear-gradient(90deg, #ff2a5f, #bf5af2, #0071e3);
-    transition: width 0.1s linear;
-  }
-
-  /* État ACTIF */
-  .sound-card.is-playing {
-    background: rgba(255, 255, 255, 0.85);
-    border-color: rgba(255, 255, 255, 1);
-  }
-  
-  .sound-card.is-playing .emoji {
-    transform: scale(1.1) translateY(-10px);
-  }
-
-  /* =========================================
-     📱 OPTIMISATIONS POUR TÉLÉPHONES (MOBILE)
-     ========================================= */
   @media (max-width: 600px) {
-    .nav-container { 
-      flex-direction: column; 
-      gap: 12px; 
-      padding: 5px 0;
-    }
-    
-    .search-wrapper { 
-      width: 100%; 
-      max-width: 100%; 
-    }
-    
-    /* Les boutons s'affichent côte à côte et prennent toute la largeur */
-    .controls-right { 
-      width: 100%; 
-      justify-content: stretch; 
-      gap: 10px;
-    }
-    .random-btn, .stop-btn { 
-      flex: 1; 
-      padding: 10px;
-    }
-    
-    header.hero { 
-      padding: 40px 15px 30px; 
-    }
-    h1 {
-      font-size: 38px;
-    }
-    
-    /* GRILLE 2 COLONNES OBLIGATOIRE SUR MOBILE */
-    .grid {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 14px;
-    }
-    
-    /* Ajustement des cartes pour les petits écrans */
-    .sound-card {
-      padding: 16px;
-      border-radius: 20px;
-    }
-    .card-eyebrow {
-      font-size: 11px;
-      margin-bottom: 4px;
-    }
-    .label {
-      font-size: 15px; /* Texte plus petit pour tenir dans la carte */
-    }
-    .emoji {
-      font-size: 55px; /* Émoji plus petit */
-      bottom: 8px;
-      right: 8px;
-    }
-    .fav-btn {
-      top: 8px;
-      right: 8px;
-      padding: 2px;
-    }
-    .fav-btn svg {
-      width: 20px;
-      height: 20px;
-    }
+    .nav-container { flex-direction: column; gap: 12px; }
+    .controls-right { width: 100%; justify-content: stretch; gap: 10px; }
+    .random-btn, .stop-btn { flex: 1; }
+    .grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .label { font-size: 15px; }
+    .emoji { font-size: 55px; }
   }
 </style>
 </head>
 <body>
 
-  <!-- Mesh Gradient Background -->
   <div class="mesh-bg">
     <div class="mesh-blob blob-1"></div>
     <div class="mesh-blob blob-2"></div>
@@ -449,12 +280,8 @@
       </div>
       
       <div class="controls-right">
-        <button id="randomBtn" class="random-btn">
-          <span>🔀 Aléatoire</span>
-        </button>
-        <button id="stopBtn" class="stop-btn">
-          <span>⏹️ Arrêter</span>
-        </button>
+        <button id="randomBtn" class="random-btn"><span>🔀 Aléatoire</span></button>
+        <button id="stopBtn" class="stop-btn"><span>⏹️ Arrêter</span></button>
       </div>
     </div>
   </nav>
@@ -465,17 +292,14 @@
   </header>
 
   <main>
-    <div class="grid" id="grid">
-      <!-- Les cartes sont générées par JS -->
-    </div>
+    <div class="grid" id="grid"></div>
   </main>
 
-  <script>
-    /* ======================================================
-      TES SONS (Hébergés sur ton GitHub)
-      Crée un dossier "audio" à côté de ton index.html 
-      et mets tes fichiers audio dedans.
-      ====================================================== */
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
     const SOUNDS = [
       { name: "Angeeee Oceee", emoji: "👯‍♀️", data: "audio/ange.wav" },
       { name: "Bébé", emoji: "👶", data: "audio/bebe.wav" },
@@ -492,27 +316,69 @@
       { name: "Nabilla", emoji: "💅", data: "audio/nabilla.wav" }
     ];
 
+    // Firebase Config
+    const firebaseConfig = JSON.parse(window.__firebase_config || '{}');
+    const appId = window.__app_id || 'default-app-id';
+    
+    let db, auth, user;
+    let favorites = new Set();
+
     const grid = document.getElementById('grid');
     const searchInput = document.getElementById('searchInput');
     const stopBtn = document.getElementById('stopBtn');
     const randomBtn = document.getElementById('randomBtn');
 
-    let currentAudio = null;
-    let currentProgressBar = null;
-    let currentCard = null;
-    let animationFrameId = null;
-    
-    // Système de favoris (en mémoire pour la session)
-    let favorites = new Set();
+    let currentAudio = null, currentProgressBar = null, currentCard = null, animationFrameId = null;
+
+    async function initFirebase() {
+      if (!firebaseConfig.apiKey) return;
+      const app = initializeApp(firebaseConfig);
+      auth = getAuth(app);
+      db = getFirestore(app);
+
+      const initAuth = async () => {
+        try {
+          if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+            await signInWithCustomToken(auth, __initial_auth_token);
+          } else {
+            await signInAnonymously(auth);
+          }
+        } catch (e) { console.error(e); }
+      };
+
+      await initAuth();
+
+      onAuthStateChanged(auth, (u) => {
+        user = u;
+        if (user) loadFavorites();
+      });
+    }
+
+    async function loadFavorites() {
+      if (!user) return;
+      const favDocRef = doc(db, 'artifacts', appId, 'users', user.uid, 'settings', 'favorites');
+      
+      onSnapshot(favDocRef, (docSnap) => {
+        if (docSnap.exists()) {
+          favorites = new Set(docSnap.data().list || []);
+          renderSounds(searchInput.value);
+        }
+      }, (err) => console.error(err));
+    }
+
+    async function toggleFavorite(name) {
+      if (!user) return;
+      if (favorites.has(name)) favorites.delete(name);
+      else favorites.add(name);
+      
+      const favDocRef = doc(db, 'artifacts', appId, 'users', user.uid, 'settings', 'favorites');
+      await setDoc(favDocRef, { list: Array.from(favorites) });
+    }
 
     function stopCurrentSound() {
-      if (currentAudio) {
-        currentAudio.pause();
-        currentAudio.currentTime = 0;
-      }
+      if (currentAudio) { currentAudio.pause(); currentAudio.currentTime = 0; }
       if (currentProgressBar) currentProgressBar.style.width = '0%';
       if (currentCard) currentCard.classList.remove('is-playing');
-      
       cancelAnimationFrame(animationFrameId);
       stopBtn.classList.remove('visible');
     }
@@ -521,113 +387,60 @@
       if (!currentAudio || !currentProgressBar) return;
       const percentage = (currentAudio.currentTime / currentAudio.duration) * 100;
       currentProgressBar.style.width = `${percentage || 0}%`;
-
-      if (currentAudio.currentTime < currentAudio.duration && !currentAudio.paused) {
-        animationFrameId = requestAnimationFrame(updateProgress);
-      }
+      if (!currentAudio.paused) animationFrameId = requestAnimationFrame(updateProgress);
     }
 
     function playSound(soundData, cardElement, progressElement) {
       stopCurrentSound();
-
       currentAudio = new Audio(soundData);
-      
       currentProgressBar = progressElement;
       currentCard = cardElement;
-
       cardElement.classList.add('is-playing');
       stopBtn.classList.add('visible');
-
-      currentAudio.play().catch(e => console.log("Erreur de lecture :", e));
+      currentAudio.play().catch(e => console.log(e));
       animationFrameId = requestAnimationFrame(updateProgress);
-
-      currentAudio.addEventListener('ended', stopCurrentSound);
+      currentAudio.onended = stopCurrentSound;
     }
 
     function renderSounds(filter = '') {
       grid.innerHTML = '';
       const filterLower = filter.toLowerCase();
-      
-      // Filtrer puis trier : les favoris apparaissent en premier
-      const filteredSounds = SOUNDS.filter(sound => 
-        sound.name.toLowerCase().includes(filterLower)
-      ).sort((a, b) => {
-        const aFav = favorites.has(a.name);
-        const bFav = favorites.has(b.name);
-        if (aFav && !bFav) return -1;
-        if (!aFav && bFav) return 1;
-        return 0;
-      });
+      const filtered = SOUNDS.filter(s => s.name.toLowerCase().includes(filterLower))
+        .sort((a, b) => (favorites.has(b.name) - favorites.has(a.name)));
 
-      filteredSounds.forEach((sound) => {
+      filtered.forEach((sound) => {
         const card = document.createElement('div');
         card.className = 'sound-card';
-        
         const isFav = favorites.has(sound.name);
 
         card.innerHTML = `
-          <button class="fav-btn ${isFav ? 'is-favorite' : ''}" title="Ajouter aux favoris">
+          <button class="fav-btn ${isFav ? 'is-favorite' : ''}">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
           </button>
           <span class="card-eyebrow">Audio</span>
           <h2 class="label">${sound.name}</h2>
           <span class="emoji">${sound.emoji}</span>
-          <div class="progress-wrap">
-            <div class="progress-bar"></div>
-          </div>
+          <div class="progress-wrap"><div class="progress-bar"></div></div>
         `;
 
-        const progressBar = card.querySelector('.progress-bar');
-        const favBtn = card.querySelector('.fav-btn');
-
-        // Gestion du clic sur le coeur (sans lancer le son)
-        favBtn.addEventListener('click', (e) => {
-          e.stopPropagation(); // Empêche le clic de se propager à la carte
-          if (favorites.has(sound.name)) {
-            favorites.delete(sound.name);
-          } else {
-            favorites.add(sound.name);
-          }
-          // On recharge l'affichage pour mettre à jour le tri
-          renderSounds(searchInput.value);
-        });
-
-        // Lancement du son au clic sur la carte
-        card.addEventListener('click', () => {
-          playSound(sound.data, card, progressBar);
-        });
-
+        card.querySelector('.fav-btn').onclick = (e) => { e.stopPropagation(); toggleFavorite(sound.name); };
+        card.onclick = () => playSound(sound.data, card, card.querySelector('.progress-bar'));
         grid.appendChild(card);
       });
     }
 
-    /* --- LISTENERS --- */
-    searchInput.addEventListener('input', (e) => renderSounds(e.target.value));
-    
-    stopBtn.addEventListener('click', stopCurrentSound);
-    
-    // Bouton Aléatoire
-    randomBtn.addEventListener('click', () => {
-      // Sélectionne toutes les cartes actuellement affichées
+    searchInput.oninput = (e) => renderSounds(e.target.value);
+    stopBtn.onclick = stopCurrentSound;
+    randomBtn.onclick = () => {
       const cards = grid.querySelectorAll('.sound-card');
-      if (cards.length > 0) {
-        // Choisit une carte au hasard
-        const randomCard = cards[Math.floor(Math.random() * cards.length)];
-        // Simule un clic sur cette carte
-        randomCard.click();
-      }
-    });
+      if (cards.length) cards[Math.floor(Math.random() * cards.length)].click();
+    };
 
-    // Raccourci clavier : Barre Espace pour arrêter le son
-    document.addEventListener('keydown', (e) => {
-      // On vérifie que la touche est Espace et qu'on n'est pas en train d'écrire dans la recherche
-      if (e.code === 'Space' && e.target !== searchInput) {
-        e.preventDefault(); // Empêche la page de défiler vers le bas
-        stopCurrentSound();
-      }
-    });
+    document.onkeydown = (e) => {
+      if (e.code === 'Space' && e.target !== searchInput) { e.preventDefault(); stopCurrentSound(); }
+    };
 
-    // Initialisation
+    initFirebase();
     renderSounds();
   </script>
 </body>
