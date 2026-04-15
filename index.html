@@ -245,6 +245,7 @@
   .fav-btn {
     position: absolute; top: 15px; right: 15px; background: none; border: none; cursor: pointer; z-index: 10;
     color: rgba(0, 0, 0, 0.2); transition: transform 0.2s ease, color 0.2s ease;
+    display: flex; align-items: center; justify-content: center;
   }
   .fav-btn:hover { transform: scale(1.15); color: rgba(0, 0, 0, 0.5); }
   .fav-btn.is-favorite { color: #4a4a4a; transform: scale(1.05); }
@@ -298,7 +299,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     const SOUNDS = [
       { name: "Angeeee Oceee", emoji: "👯‍♀️", data: "audio/ange.wav" },
@@ -316,9 +317,9 @@
       { name: "Nabilla", emoji: "💅", data: "audio/nabilla.wav" }
     ];
 
-    // Firebase Config
-    const firebaseConfig = JSON.parse(window.__firebase_config || '{}');
-    const appId = window.__app_id || 'default-app-id';
+    // Global variables from environment
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
     
     let db, auth, user;
     let favorites = new Set();
@@ -331,7 +332,12 @@
     let currentAudio = null, currentProgressBar = null, currentCard = null, animationFrameId = null;
 
     async function initFirebase() {
-      if (!firebaseConfig.apiKey) return;
+      if (!firebaseConfig.apiKey) {
+        console.warn("Firebase not configured. Favorites will be session-only.");
+        renderSounds();
+        return;
+      }
+      
       const app = initializeApp(firebaseConfig);
       auth = getAuth(app);
       db = getFirestore(app);
@@ -343,7 +349,7 @@
           } else {
             await signInAnonymously(auth);
           }
-        } catch (e) { console.error(e); }
+        } catch (e) { console.error("Auth failed:", e); }
       };
 
       await initAuth();
@@ -351,6 +357,7 @@
       onAuthStateChanged(auth, (u) => {
         user = u;
         if (user) loadFavorites();
+        else renderSounds();
       });
     }
 
@@ -361,18 +368,31 @@
       onSnapshot(favDocRef, (docSnap) => {
         if (docSnap.exists()) {
           favorites = new Set(docSnap.data().list || []);
-          renderSounds(searchInput.value);
+        } else {
+          favorites = new Set();
         }
-      }, (err) => console.error(err));
+        renderSounds(searchInput.value);
+      }, (err) => {
+        console.error("Firestore error:", err);
+        renderSounds(searchInput.value);
+      });
     }
 
     async function toggleFavorite(name) {
-      if (!user) return;
+      // Optimistic UI update
       if (favorites.has(name)) favorites.delete(name);
       else favorites.add(name);
       
-      const favDocRef = doc(db, 'artifacts', appId, 'users', user.uid, 'settings', 'favorites');
-      await setDoc(favDocRef, { list: Array.from(favorites) });
+      renderSounds(searchInput.value);
+
+      if (!user || !db) return;
+      
+      try {
+        const favDocRef = doc(db, 'artifacts', appId, 'users', user.uid, 'settings', 'favorites');
+        await setDoc(favDocRef, { list: Array.from(favorites) });
+      } catch (e) {
+        console.error("Save failed:", e);
+      }
     }
 
     function stopCurrentSound() {
@@ -397,7 +417,7 @@
       currentCard = cardElement;
       cardElement.classList.add('is-playing');
       stopBtn.classList.add('visible');
-      currentAudio.play().catch(e => console.log(e));
+      currentAudio.play().catch(e => console.error("Audio play failed:", e));
       animationFrameId = requestAnimationFrame(updateProgress);
       currentAudio.onended = stopCurrentSound;
     }
@@ -406,7 +426,7 @@
       grid.innerHTML = '';
       const filterLower = filter.toLowerCase();
       const filtered = SOUNDS.filter(s => s.name.toLowerCase().includes(filterLower))
-        .sort((a, b) => (favorites.has(b.name) - favorites.has(a.name)));
+        .sort((a, b) => (favorites.has(b.name) ? -1 : 1) - (favorites.has(a.name) ? -1 : 1));
 
       filtered.forEach((sound) => {
         const card = document.createElement('div');
@@ -441,7 +461,7 @@
     };
 
     initFirebase();
-    renderSounds();
+    if (!firebaseConfig.apiKey) renderSounds(); // Fallback if firebase is disabled
   </script>
 </body>
 </html>
