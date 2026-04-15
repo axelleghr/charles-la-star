@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Charles Box - Apple Music Style</title>
 <style>
   :root {
@@ -142,6 +142,7 @@
     -webkit-backdrop-filter: blur(10px);
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
   }
 
@@ -170,6 +171,7 @@
     -webkit-backdrop-filter: blur(10px);
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
   }
 
@@ -208,7 +210,7 @@
   }
 
   .subtitle {
-    font-size: clamp(20px, 4vw, 28px);
+    font-size: clamp(18px, 4vw, 24px);
     color: rgba(29, 29, 31, 0.7);
     font-weight: 500;
     letter-spacing: 0.01em;
@@ -279,11 +281,11 @@
   }
 
   .label {
-    font-size: 24px;
+    font-size: 22px;
     font-weight: 700;
     letter-spacing: -0.015em;
     color: var(--apple-text);
-    line-height: 1.1;
+    line-height: 1.15;
     z-index: 2;
     max-width: 100%;
   }
@@ -311,9 +313,8 @@
     border: none;
     cursor: pointer;
     z-index: 10;
-    color: rgba(0, 0, 0, 0.2); /* Gris très clair pour l'état inactif */
+    color: rgba(0, 0, 0, 0.2);
     transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), color 0.2s ease;
-    /* On évite que le clic sur le coeur déclenche l'animation de la carte entière */
     transform-origin: center;
     padding: 5px;
     display: flex;
@@ -327,13 +328,13 @@
   }
 
   .fav-btn.is-favorite {
-    color: #4a4a4a; /* Gris foncé pour l'état actif */
+    color: #4a4a4a;
     transform: scale(1.05);
   }
   
   .fav-btn.is-favorite:hover {
     transform: scale(1.15);
-    color: #1d1d1f; /* Encore plus foncé au survol */
+    color: #1d1d1f;
   }
 
   /* Barre de progression avec dégradé vibrant */
@@ -362,13 +363,72 @@
     transform: scale(1.1) translateY(-10px);
   }
 
+  /* =========================================
+     📱 OPTIMISATIONS POUR TÉLÉPHONES (MOBILE)
+     ========================================= */
   @media (max-width: 600px) {
-    .nav-container { flex-direction: column; gap: 15px; }
-    .search-wrapper { width: 100%; max-width: 100%; }
-    .controls-right { width: 100%; justify-content: center; }
-    header.hero { padding: 40px 20px 30px; }
+    .nav-container { 
+      flex-direction: column; 
+      gap: 12px; 
+      padding: 5px 0;
+    }
+    
+    .search-wrapper { 
+      width: 100%; 
+      max-width: 100%; 
+    }
+    
+    /* Les boutons s'affichent côte à côte et prennent toute la largeur */
+    .controls-right { 
+      width: 100%; 
+      justify-content: stretch; 
+      gap: 10px;
+    }
+    .random-btn, .stop-btn { 
+      flex: 1; 
+      padding: 10px;
+    }
+    
+    header.hero { 
+      padding: 40px 15px 30px; 
+    }
+    h1 {
+      font-size: 38px;
+    }
+    
+    /* GRILLE 2 COLONNES OBLIGATOIRE SUR MOBILE */
+    .grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+    
+    /* Ajustement des cartes pour les petits écrans */
+    .sound-card {
+      padding: 16px;
+      border-radius: 20px;
+    }
+    .card-eyebrow {
+      font-size: 11px;
+      margin-bottom: 4px;
+    }
+    .label {
+      font-size: 15px; /* Texte plus petit pour tenir dans la carte */
+    }
+    .emoji {
+      font-size: 55px; /* Émoji plus petit */
+      bottom: 8px;
+      right: 8px;
+    }
+    .fav-btn {
+      top: 8px;
+      right: 8px;
+      padding: 2px;
+    }
+    .fav-btn svg {
+      width: 20px;
+      height: 20px;
+    }
   }
-
 </style>
 </head>
 <body>
